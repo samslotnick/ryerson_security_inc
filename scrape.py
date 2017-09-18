@@ -6,7 +6,6 @@ import configparser
 config = configparser.ConfigParser()
 config.read("config.ini")
 api_key = config['KEYS']['api_key']
-#api_key='AIzaSyDMBNDabjlj7zqLLGjTyA-C7z0poNrHBLY'
 def getGeo(location, api_key):
     streets = ["Alleyway","Alley","Sidewalk"]
     location_ar = location.replace(",","").split(" ")
@@ -16,7 +15,7 @@ def getGeo(location, api_key):
             mod_location += word + " "
 #    mod_location = location.lower()
     mod_location = mod_location.replace(","," ").replace("sidewalk","").replace("near","").replace("alleyway","")
-    print(mod_location)
+#    print(mod_location)
     base = "https://maps.googleapis.com/maps/api/geocode/json?"
     addL = "address=" + mod_location.replace(" ", "+") + "&key=" + api_key
     geoURL = base + addL
@@ -28,6 +27,13 @@ def getGeo(location, api_key):
     else:
         geoResult = ""
     return geoResult  
+
+def arrestFormat(nature):
+    if "Arrest Made in" in nature:
+        nature = nature.partition("in ")[-1]
+    else:
+        nature = nature.partition(" -")[0]
+    return nature
 
 page = 0
 links = []
@@ -58,18 +64,29 @@ while page < 50:
             date = paras[6].text.rstrip()
         nature = soup2.find_all("h1")
         nature = nature[2].text.rstrip()
+        if "with a weapon" in nature.lower():
+            weapon = nature.partition("(")[-1].replace(")","")
+            nature = nature.partition("(")[0].rstrip()
+        else: 
+            weapon = False
+        if "arrest made" in nature.lower():
+            arrest = True
+            nature = arrestFormat(nature)
+        else:
+            arrest = False
 #        getGeo(location, api_key)
-        stats.append({"nature": nature, "date": date, "location":location, "geoLoc": getGeo(location, api_key)})
+        if "arrest made" in nature.lower():
+            print(nature)
+        stats.append({"nature": nature, "date": date, "location":location, "geoLoc": getGeo(location, api_key), "weapon": weapon, "arrest": arrest})
     page += 10
+outfile = open("data.txt","w",encoding='utf-8')
+outfile.write(json.dumps(stats))
 print("----- %s seconds ----" % (time.time() - start_time))
+outfile.close()
 #print(stats)
 #place = google_maps.search(location=paras[8].text)
 #print(place)
 
 
-
-#==============================================================================
-# descrip_info    attempted    weapon knife rock arrest made  
-#==============================================================================
 
 
