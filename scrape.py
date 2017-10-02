@@ -18,13 +18,14 @@ def getGeo(location, api_key):
     mod_location = mod_location.replace(","," ").replace("sidewalk","").replace("near","").replace("alleyway","")
 #    print(mod_location)
     base = "https://maps.googleapis.com/maps/api/geocode/json?"
-    addL = "address=" + mod_location.replace(" ", "+") + "&key=" + api_key
+    addL = "address=" + mod_location.replace(" ", "+") + "+Toronto&key=" + api_key
     geoURL = base + addL
     response = urlopen(geoURL)
     jsonRaw = response.read()
     jsonData = json.loads(jsonRaw)
     if jsonData['status'] == 'OK':
         geoResult = []
+#        print(jsonData['results'])
         geoResult.append(jsonData['results'][0]['geometry']['location']['lng'])
         geoResult.append(jsonData['results'][0]['geometry']['location']['lat'])
     else:
@@ -93,5 +94,7 @@ outfile.close()
 #place = google_maps.search(location=paras[8].text)
 #print(place)
 
-
-
+#https://www.google.ca/maps/place/Peel+Regional+Municipality,+ON/@43.653527,-79.3903075,14.7z/data=!4m5!3m4!1s0x882b3c30c9eb87ab:0x3bec33bf3e68e6a3!8m2!3d43.6766398!4d-79.7848422
+#
+#ne =  43.664732, -79.362917
+#sw = 43.638820, -79.444163
